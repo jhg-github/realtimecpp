@@ -59,34 +59,67 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//class led{
+//public:
+//	// use convenient class-specific typedefs
+//	//book typedef std::uint8_t port_type;
+//	typedef std::uint16_t pin_type;
+//
+//	// the led class constructor
+//	led(GPIO_TypeDef * port	, pin_type pin) : port(port), pin(pin) {
+//		// set the port pin value to low
+//		HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+//	}
+//
+//	void toggle() const{
+//		HAL_GPIO_TogglePin(port, pin);
+//	}
+//
+//
+//private:
+//	// private member variables of the class
+//	GPIO_TypeDef * const port;
+//	const pin_type pin;
+//
+//};
+//
+//namespace {
+//	// create led2 on A5
+//	const led led2 {
+//		LD2_GPIO_Port,
+//		LD2_Pin
+//	};
+//}
+
 class led{
 public:
 	// use convenient class-specific typedefs
-	//book typedef std::uint8_t port_type;
-	typedef std::uint16_t pin_type;
+	typedef std::uint32_t port_type;
+	typedef std::uint32_t bval_type;
 
 	// the led class constructor
-	led(GPIO_TypeDef * port	, pin_type pin) : port(port), pin(pin) {
+	led(const port_type p, const bval_type b)
+		: port(p), bval(b) {
 		// set the port pin value to low
-		HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+		*reinterpret_cast<volatile bval_type*>(port) &= static_cast<bval_type>(~bval);
 	}
 
 	void toggle() const{
-		HAL_GPIO_TogglePin(port, pin);
+		// toggle led via direct memory access
+		*reinterpret_cast<volatile bval_type*>(port) ^= bval;
 	}
-
 
 private:
 	// private member variables of the class
-	GPIO_TypeDef * const port;
-	const pin_type pin;
+	const port_type port;
+	const bval_type bval;
 
 };
 
 namespace {
 	// create led2 on A5
 	const led led2 {
-		LD2_GPIO_Port,
+		reinterpret_cast<led::port_type>(&GPIOA->ODR),
 		LD2_Pin
 	};
 }
@@ -133,7 +166,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  led2.toggle();
-	  HAL_Delay(100);
+	  HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
