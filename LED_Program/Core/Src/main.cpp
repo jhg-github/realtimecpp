@@ -91,15 +91,46 @@ static void MX_USART2_UART_Init(void);
 //	};
 //}
 
-class led{
-public:
-	// use convenient class-specific typedefs
-	typedef std::uint32_t port_type;
-	typedef std::uint32_t bval_type;
+//class led{
+//public:
+//	// use convenient class-specific typedefs
+//	typedef std::uint32_t port_type;
+//	typedef std::uint32_t bval_type;
+//
+//	// the led class constructor
+//	led(const port_type p, const bval_type b)
+//		: port(p), bval(b) {
+//		// set the port pin value to low
+//		*reinterpret_cast<volatile bval_type*>(port) &= static_cast<bval_type>(~bval);
+//	}
+//
+//	void toggle() const{
+//		// toggle led via direct memory access
+//		*reinterpret_cast<volatile bval_type*>(port) ^= bval;
+//	}
+//
+//private:
+//	// private member variables of the class
+//	const port_type port;
+//	const bval_type bval;
+//
+//};
+//
+//namespace {
+//	// create led2 on A5
+//	const led led2 {
+//		reinterpret_cast<led::port_type>(&GPIOA->ODR),
+//		LD2_Pin
+//	};
+//}
 
-	// the led class constructor
-	led(const port_type p, const bval_type b)
-		: port(p), bval(b) {
+template<typename port_type,
+		typename bval_type,
+		const port_type port,
+		const bval_type bval>
+class led_template{
+public:
+	led_template(){
 		// set the port pin value to low
 		*reinterpret_cast<volatile bval_type*>(port) &= static_cast<bval_type>(~bval);
 	}
@@ -109,19 +140,14 @@ public:
 		*reinterpret_cast<volatile bval_type*>(port) ^= bval;
 	}
 
-private:
-	// private member variables of the class
-	const port_type port;
-	const bval_type bval;
-
 };
 
 namespace {
 	// create led2 on A5
-	const led led2 {
-		reinterpret_cast<led::port_type>(&GPIOA->ODR),
-		LD2_Pin
-	};
+	const led_template<std::uint32_t,
+						std::uint32_t,
+						0x50000014,		// i don't know how toset it usun GPIOA
+						LD2_Pin> led2;
 }
 
 
@@ -166,7 +192,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  led2.toggle();
-	  HAL_Delay(1000);
+	  HAL_Delay(100);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
