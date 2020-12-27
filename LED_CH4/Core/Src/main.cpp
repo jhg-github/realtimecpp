@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -27,6 +28,8 @@
 
 #include "../../Src_Mio/mcal.h"
 #include "../../Src_Mio/led_port.h"
+#include "../../Src_Mio/pwm.h"
+#include "../../Src_Mio/led_pwm.h"
 
 /* USER CODE END Includes */
 
@@ -63,8 +66,12 @@ namespace{
 led_port led_a5 { mcal::reg::porta_odr, mcal::reg::bval5 };
 led_port led0 { mcal::reg::porta_odr, mcal::reg::bval10 };
 led_port led1 { mcal::reg::portb_odr, mcal::reg::bval3 };
-led_port led2 { mcal::reg::portb_odr, mcal::reg::bval5 };
-led_port led3 { mcal::reg::portb_odr, mcal::reg::bval4 };
+
+pwm pwm0 { &htim3, TIM_CHANNEL_2 };
+pwm pwm1 { &htim3, TIM_CHANNEL_1 };
+
+led_pwm led2 { &pwm0 };
+led_pwm led3 { &pwm1 };
 }
 
 /* USER CODE END 0 */
@@ -98,7 +105,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+  led2.start();
+  led3.start();
 
   /* USER CODE END 2 */
 
@@ -108,15 +119,37 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-	  led_a5.toggle();
-	  led0.toggle();
-	  HAL_Delay(50);
-	  led1.toggle();
-	  HAL_Delay(50);
-	  led2.toggle();
-	  HAL_Delay(50);
-	  led3.toggle();
-	  HAL_Delay(50);
+	  for(int i = 0;i < 25; i++){
+		led_a5.toggle();
+		led0.toggle();
+		HAL_Delay(50);
+		led1.toggle();
+		HAL_Delay(50);
+		led2.toggle();
+		HAL_Delay(50);
+		led3.toggle();
+		HAL_Delay(50);
+	  }
+
+	  for(int j = 0;j < 5;j++){
+		  for(int i = 0;i <= 100;i++){
+			led_a5.toggle();
+			led0.toggle();
+			led1.toggle();
+			led2.dimming(i);
+			led3.dimming(100-i);
+			HAL_Delay(5);
+		  }
+		  for(int i = 0;i <= 100;i++){
+			led_a5.toggle();
+			led0.toggle();
+			led1.toggle();
+			led2.dimming(100-i);
+			led3.dimming(i);
+			HAL_Delay(5);
+		  }
+	  }
+
 
     /* USER CODE BEGIN 3 */
   }
