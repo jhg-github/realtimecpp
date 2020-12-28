@@ -62,6 +62,10 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void led_toggler(led_base& led){
+	led.toggle();
+}
+
 namespace{
 led_port led_a5 { mcal::reg::porta_odr, mcal::reg::bval5 };
 led_port led0 { mcal::reg::porta_odr, mcal::reg::bval10 };
@@ -148,6 +152,18 @@ int main(void)
 			led3.dimming(i);
 			HAL_Delay(5);
 		  }
+	  }
+
+	  for(int i = 0;i < 25; i++){
+		led_toggler(led_a5);
+		led_toggler(led0);
+		HAL_Delay(50);
+		led_toggler(led1);
+		HAL_Delay(50);
+		led_toggler(led2);
+		HAL_Delay(50);
+		led_toggler(led3);
+		HAL_Delay(50);
 	  }
 
 
